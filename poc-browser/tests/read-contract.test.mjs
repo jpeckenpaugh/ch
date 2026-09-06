@@ -7,7 +7,7 @@ const db=new SQL.Database(await readFile(new URL('../data/seed.db',import.meta.u
 db.run('PRAGMA foreign_keys=ON');
 const operations=new Map();
 const query=(sql,params=[])=>{const stmt=db.prepare(sql);try {stmt.bind(params);const rows=[];while(stmt.step())rows.push(stmt.getAsObject());return rows;}finally{stmt.free();}};
-registerOperations({register:(name,handler,write)=>{assert.ok(!write,'Read-stage registry must not contain mutations');operations.set(name,handler);},query,run:(sql,params)=>db.run(sql,params)});
+registerOperations({register:(name,handler,write)=>{operations.set(name,handler);},query,run:(sql,params)=>db.run(sql,params)});
 const call=(name,payload={})=>operations.get(name)(payload);
 try {
  const companies=call('companies.list');assert.equal(companies.length,6);

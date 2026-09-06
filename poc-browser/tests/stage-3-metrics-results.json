@@ -1,0 +1,346 @@
+{
+  "testedAt": "2026-09-06T17:50:15.773Z",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/152.0.7977.77",
+    "revision": "@529d9a34b491745086b59458f58a5aae8292adaa",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+    "jsVersion": "15.2.124.19"
+  },
+  "platform": "darwin",
+  "results": [
+    {
+      "targetMiB": 10,
+      "exportedBytes": 10625024,
+      "samples": [
+        {
+          "roundTripMilliseconds": 13.800000011920929,
+          "lastSave": {
+            "bytes": 10625024,
+            "milliseconds": 10.400000005960464,
+            "totalMilliseconds": 12.199999988079071,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 10625024,
+          "usage": 10625672,
+          "quota": 10748043912,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 11989108,
+            "totalJSHeapSize": 13641656,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 10,
+          "lastSave": {
+            "bytes": 10625024,
+            "milliseconds": 8.100000023841858,
+            "totalMilliseconds": 9.599999994039536,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 10625024,
+          "usage": 10625672,
+          "quota": 10748043912,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 11989108,
+            "totalJSHeapSize": 13641656,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 8.800000011920929,
+          "lastSave": {
+            "bytes": 10625024,
+            "milliseconds": 7,
+            "totalMilliseconds": 8.400000005960464,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 10625024,
+          "usage": 10625672,
+          "quota": 10748043912,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 11989108,
+            "totalJSHeapSize": 13641656,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 12.099999994039536,
+          "lastSave": {
+            "bytes": 10625024,
+            "milliseconds": 9.5,
+            "totalMilliseconds": 11.599999994039536,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 10625024,
+          "usage": 10625672,
+          "quota": 10748043912,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 11989108,
+            "totalJSHeapSize": 13641656,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 11.399999976158142,
+          "lastSave": {
+            "bytes": 10625024,
+            "milliseconds": 9.400000005960464,
+            "totalMilliseconds": 10.899999976158142,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 10625024,
+          "usage": 10625672,
+          "quota": 10748043912,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 11989108,
+            "totalJSHeapSize": 13641656,
+            "jsHeapSizeLimit": 4395630592
+          }
+        }
+      ]
+    },
+    {
+      "targetMiB": 50,
+      "exportedBytes": 52609024,
+      "samples": [
+        {
+          "roundTripMilliseconds": 47.30000001192093,
+          "lastSave": {
+            "bytes": 52609024,
+            "milliseconds": 39.599999994039536,
+            "totalMilliseconds": 46.20000001788139,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 52609024,
+          "usage": 52609672,
+          "quota": 10790027912,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 74811296,
+            "totalJSHeapSize": 76351336,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 43.599999994039536,
+          "lastSave": {
+            "bytes": 52609024,
+            "milliseconds": 38.900000005960464,
+            "totalMilliseconds": 43,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 52609024,
+          "usage": 52609673,
+          "quota": 10790027913,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 74811296,
+            "totalJSHeapSize": 76351336,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 45.79999998211861,
+          "lastSave": {
+            "bytes": 52609024,
+            "milliseconds": 40.900000005960464,
+            "totalMilliseconds": 45.19999998807907,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 52609024,
+          "usage": 52609673,
+          "quota": 10790027913,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 74823852,
+            "totalJSHeapSize": 76351336,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 44.70000001788139,
+          "lastSave": {
+            "bytes": 52609024,
+            "milliseconds": 39.5,
+            "totalMilliseconds": 44.20000001788139,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 52609024,
+          "usage": 52609673,
+          "quota": 10790027913,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 74823852,
+            "totalJSHeapSize": 76351336,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 75.19999998807907,
+          "lastSave": {
+            "bytes": 52609024,
+            "milliseconds": 70.5,
+            "totalMilliseconds": 74.7999999821186,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 52609024,
+          "usage": 52609673,
+          "quota": 10790027913,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 74835896,
+            "totalJSHeapSize": 76351336,
+            "jsHeapSizeLimit": 4395630592
+          }
+        }
+      ]
+    },
+    {
+      "targetMiB": 100,
+      "exportedBytes": 105091072,
+      "samples": [
+        {
+          "roundTripMilliseconds": 98.40000000596046,
+          "lastSave": {
+            "bytes": 105091072,
+            "milliseconds": 80.80000001192093,
+            "totalMilliseconds": 95,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 105091072,
+          "usage": 105091721,
+          "quota": 10842509961,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 158659292,
+            "totalJSHeapSize": 160192360,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 94.59999999403954,
+          "lastSave": {
+            "bytes": 105091072,
+            "milliseconds": 85.7999999821186,
+            "totalMilliseconds": 93.90000000596046,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 105091072,
+          "usage": 105091721,
+          "quota": 10842509961,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 158666212,
+            "totalJSHeapSize": 160192360,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 88.2000000178814,
+          "lastSave": {
+            "bytes": 105091072,
+            "milliseconds": 79.7000000178814,
+            "totalMilliseconds": 87.69999998807907,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 105091072,
+          "usage": 105091721,
+          "quota": 10842509961,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 158672212,
+            "totalJSHeapSize": 160192360,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 161.7000000178814,
+          "lastSave": {
+            "bytes": 105091072,
+            "milliseconds": 152.5,
+            "totalMilliseconds": 160.80000001192093,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 105091072,
+          "usage": 105091721,
+          "quota": 10842509961,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 158678144,
+            "totalJSHeapSize": 160192360,
+            "jsHeapSizeLimit": 4395630592
+          }
+        },
+        {
+          "roundTripMilliseconds": 162.09999999403954,
+          "lastSave": {
+            "bytes": 105091072,
+            "milliseconds": 152.5,
+            "totalMilliseconds": 161.5,
+            "wasmHeapBefore": 22151168,
+            "wasmHeapAfterExport": 22151168
+          },
+          "workspaceBytes": 105091072,
+          "usage": 105091721,
+          "quota": 10842509961,
+          "persistent": false,
+          "databaseMemoryBytes": 22151168,
+          "workerJSHeapBytes": null,
+          "pageHeap": {
+            "usedJSHeapSize": 158684088,
+            "totalJSHeapSize": 160192360,
+            "jsHeapSizeLimit": 4395630592
+          }
+        }
+      ]
+    }
+  ]
+}

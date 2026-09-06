@@ -1,0 +1,29 @@
+{
+  "testedAt": "2026-09-06T17:47:12.628Z",
+  "results": [
+    {
+      "name": "company plus initial location saved atomically through form",
+      "passed": true
+    },
+    {
+      "name": "company edit survives reload",
+      "passed": true
+    },
+    {
+      "name": "location add edit delete persists",
+      "passed": true
+    },
+    {
+      "name": "reference add edit delete persists",
+      "passed": true
+    },
+    {
+      "name": "news add edit delete persists",
+      "passed": true
+    },
+    {
+      "name": "industry create and rename survives reload",
+      "passed": true
+    }
+  ]
+}

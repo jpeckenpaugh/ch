@@ -36,7 +36,13 @@ function snapshot() {
 }
 async function persist() {
   const start = performance.now();
-  try { const bytes = snapshot(); await storage.replaceWorkspace(bytes); storage.lastSave.totalMilliseconds = performance.now()-start; }
+  const wasmHeapBefore = SQL.HEAPU8?.buffer.byteLength ?? null;
+  try {
+    const bytes = snapshot();
+    const wasmHeapAfterExport = SQL.HEAPU8?.buffer.byteLength ?? null;
+    await storage.replaceWorkspace(bytes);
+    Object.assign(storage.lastSave, {totalMilliseconds:performance.now()-start, wasmHeapBefore, wasmHeapAfterExport});
+  }
   catch (error) { return recover(error); }
 }
 async function replace(bytes) {
@@ -49,7 +55,7 @@ async function replace(bytes) {
   catch (error) { return recover(error); }
   return status();
 }
-function status() { return {...storage.metadata, state:failed ? 'failed' : 'saved', workspace:storage.name, workspaceBytes:storage.workspaceBytes, lastSave:storage.lastSave || null, metadataWarning:storage.metadataWarning || null}; }
+function status() { return {...storage.metadata, state:failed ? 'failed' : 'saved', workspace:storage.name, workspaceBytes:storage.workspaceBytes, databaseMemoryBytes:SQL.HEAPU8?.buffer.byteLength ?? null, workerJSHeapBytes:performance.memory?.usedJSHeapSize ?? null, lastSave:storage.lastSave || null, metadataWarning:storage.metadataWarning || null}; }
 register('workspace.status', status);
 register('workspace.export', () => snapshot().buffer);
 register('workspace.replace', payload => replace(payload.bytes));
