@@ -19,6 +19,10 @@ async function initialize() {
   seed = await seeds.seedBytes(SQL, probe);
   storage = new WorkspaceStorage(probe ? 'company-hub-probe' : 'company-hub', {seedVersion:probe ? 'probe-v1' : 'company-hub-seed-v1', schemaRevision:probe ? null : '0003_sprint03_roles'});
   database = open(await storage.openWorkspace(seed));
+  if (!probe) {
+    const {registerOperations} = await import('./repo/index.js');
+    registerOperations({register, query, run:(sql,params=[])=>database.run(sql,params)});
+  }
   initialized = true;
 }
 async function recover(error) {

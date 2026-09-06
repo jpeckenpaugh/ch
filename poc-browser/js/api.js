@@ -1,0 +1,20 @@
+import { db } from './db/client.js';
+
+export const listCompanies = (q, countries) => db.call('companies.list', {q, countries});
+export const getCompany = (id) => db.call('companies.get', {id});
+export const createCompany = (data, locations = []) => db.call('companies.create', {data, locations});
+export const updateCompany = (id, data) => db.call('companies.update', {id, data});
+export const deleteCompany = (id) => db.call('companies.delete', {id});
+export const listCountries = () => db.call('countries.list', {});
+export const listIndustries = () => db.call('industries.list', {});
+export const createIndustry = (name) => db.call('industries.create', {name});
+export const renameIndustry = (id, name) => db.call('industries.update', {id, name});
+export const createLocation = (companyId, data) => db.call('locations.add', {companyId, data});
+export const updateLocation = (companyId, id, data) => db.call('locations.update', {companyId, id, data});
+export const deleteLocation = (companyId, id) => db.call('locations.delete', {companyId, id});
+export const createReference = (companyId, data) => db.call('references.add', {companyId, data});
+export const updateReference = (companyId, id, data) => db.call('references.update', {companyId, id, data});
+export const deleteReference = (companyId, id) => db.call('references.delete', {companyId, id});
+export const createNews = (companyId, data) => db.call('news.add', {companyId, data});
+export const updateNews = (companyId, id, data) => db.call('news.update', {companyId, id, data});
+export const deleteNews = (companyId, id) => db.call('news.delete', {companyId, id});

@@ -1,0 +1,33 @@
+{
+  "seedVersion": "company-hub-seed-v1",
+  "schemaRevision": "0003_sprint03_roles",
+  "seedTimestamp": "2026-09-06T00:00:00Z",
+  "bytes": 131072,
+  "sha256": "baf893e2aee4147f092b5eb8fd476234b0b0cf6d34ec4abca6e99030aeb5bb6d",
+  "counts": {
+    "access_tokens": 0,
+    "artifacts": 0,
+    "companies": 6,
+    "countries": 83,
+    "industries": 6,
+    "locations": 19,
+    "news_articles": 23,
+    "oauth_accounts": 0,
+    "references": 12,
+    "users": 0
+  },
+  "tables": [
+    "access_tokens",
+    "alembic_version",
+    "artifacts",
+    "companies",
+    "countries",
+    "industries",
+    "locations",
+    "news_articles",
+    "oauth_accounts",
+    "references",
+    "sqlite_sequence",
+    "users"
+  ]
+}

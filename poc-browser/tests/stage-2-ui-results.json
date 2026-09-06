@@ -1,0 +1,41 @@
+{
+  "testedAt": "2026-09-06T17:43:54.221Z",
+  "url": "http://127.0.0.1:8011/index.html",
+  "cdpUrl": "http://127.0.0.1:9231",
+  "companies": 6,
+  "screenshot": "/tmp/company-hub-stage-2-profile.png",
+  "results": [
+    {
+      "name": "company directory displays canonical seed",
+      "passed": true
+    },
+    {
+      "name": "search filters rendered company rows",
+      "passed": true
+    },
+    {
+      "name": "country filter updates displayed companies",
+      "passed": true
+    },
+    {
+      "name": "profile displays company and retained child cards",
+      "passed": true
+    },
+    {
+      "name": "industry view and owner controls load",
+      "passed": true
+    },
+    {
+      "name": "create and edit forms load lookup data",
+      "passed": true
+    },
+    {
+      "name": "workspace diagnostics load",
+      "passed": true
+    },
+    {
+      "name": "no API resources or browser runtime errors",
+      "passed": true
+    }
+  ]
+}
