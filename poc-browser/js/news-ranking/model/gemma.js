@@ -1,7 +1,9 @@
 // The library and weights are fetched only after the user explicitly starts a Gemma benchmark.
 // This keeps the static POC small and leaves normal Company Hub use unaffected.
 const MODEL_ID = "onnx-community/gemma-4-E2B-it-ONNX";
-const TRANSFORMERS_URL = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.0/+esm";
+// Gemma 4 support was added in Transformers.js 4.0.1; pin a current 4.x
+// release rather than silently loading an older runtime from a broad CDN tag.
+const TRANSFORMERS_URL = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
 
 export function webGpuAvailable() { return typeof navigator !== "undefined" && Boolean(navigator.gpu); }
 

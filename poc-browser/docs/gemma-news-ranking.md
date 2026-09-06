@@ -12,7 +12,7 @@ single local WebGPU ranking. The development debug panel holds the prompt, raw
 output, parsed ranking, and timings only in page memory.
 
 The Gemma button requires WebGPU. Model weights are intentionally not vendored
-in this repository. The adapter uses Transformers.js from jsDelivr and the
+in this repository. The adapter pins Gemma-4-capable Transformers.js 4.2.0 from jsDelivr and the
 `onnx-community/gemma-4-E2B-it-ONNX` q4f16 WebGPU model artifact. Both are
 loaded only after an explicit click and are expected to be cached by the
 browser thereafter.
