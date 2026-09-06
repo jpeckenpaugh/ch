@@ -3,6 +3,7 @@ import { renderProfile } from './profile.js';
 import { renderForm } from './form.js';
 import { renderIndustries } from './industries.js';
 import { db } from './db/client.js';
+import { renderWorkspace } from './workspace.js';
 const view = document.getElementById('view');
 export const canMutate = () => true;
 export function esc(value) {
@@ -31,7 +32,8 @@ export function formatSize(bytes) {
   if (bytes == null) return "";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
 
 export function formatDate(iso) {
@@ -80,8 +82,7 @@ async function render() {
   const parts = location.hash.replace(/^#/, '').split('/').filter(Boolean);
   try {
     if (parts[0] === 'workspace') {
-      const status = await db.status();
-      view.innerHTML = `<h1 class="h4">Workspace</h1><p>This workspace is stored in this browser.</p><dl class="row">${Object.entries(status).map(([key,value]) => `<dt class="col-sm-3">${esc(key)}</dt><dd class="col-sm-9">${esc(typeof value === 'object' ? JSON.stringify(value) : value)}</dd>`).join('')}</dl>`;
+      await renderWorkspace(view);
     } else if (parts[0] === 'industries') await renderIndustries(view);
     else if (parts[0] === 'companies' && parts[1] === 'new') await renderForm(view, null);
     else if (parts[0] === 'companies' && parts[2] === 'edit') await renderForm(view, Number(parts[1]));

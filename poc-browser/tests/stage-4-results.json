@@ -1,0 +1,29 @@
+{
+  "testedAt": "2026-09-06T17:55:15.697Z",
+  "results": [
+    {
+      "name": "canonical lifecycle export reset import restores persisted edits",
+      "passed": true
+    },
+    {
+      "name": "invalid import leaves current data intact immediately and after reload",
+      "passed": true
+    },
+    {
+      "name": "visible export button downloads a standard SQLite file",
+      "passed": true
+    },
+    {
+      "name": "visible reset confirmation restores sample data",
+      "passed": true
+    },
+    {
+      "name": "visible import input restores exported file after confirmation",
+      "passed": true
+    },
+    {
+      "name": "replacement persistence failure preserves previous probe state",
+      "passed": true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 /* Classic sql.js loader remains confined to this worker. */
 const probe = new URL(self.location.href).searchParams.get('probe') === '1';
-let SQL, database, storage, seed, initialized = false, failed = null;
+let SQL, database, storage, seed, schema, initialized = false, failed = null;
 let queue = Promise.resolve();
 const registry = new Map();
 function register(name, handler, write = false) { registry.set(name, {handler, write}); }
@@ -19,6 +19,7 @@ async function initialize() {
   seed = await seeds.seedBytes(SQL, probe);
   storage = new WorkspaceStorage(probe ? 'company-hub-probe' : 'company-hub', {seedVersion:probe ? 'probe-v1' : 'company-hub-seed-v1', schemaRevision:probe ? null : '0003_sprint03_roles'});
   database = open(await storage.openWorkspace(seed));
+  if (!probe) { schema = await import('./schema.js'); schema.validateSchema(database); }
   if (!probe) {
     const {registerOperations} = await import('./repo/index.js');
     registerOperations({register, query, run:(sql,params=[])=>database.run(sql,params)});
@@ -46,15 +47,29 @@ async function persist() {
   catch (error) { return recover(error); }
 }
 async function replace(bytes) {
-  // Stage 1 probe validation; canonical schema validation is wired at Stage 4.
-  const candidate = open(new Uint8Array(bytes));
-  try { const result = candidate.exec('PRAGMA integrity_check'); if (result[0]?.values[0]?.[0] !== 'ok') throw new Error('Invalid SQLite database'); }
-  finally { candidate.close(); }
+  let candidate;
+  if (probe) {
+    candidate = open(new Uint8Array(bytes));
+    try {
+      if (candidate.exec('PRAGMA integrity_check')[0]?.values[0]?.[0] !== 'ok') {
+        throw new Error('Invalid SQLite database');
+      }
+    } catch (error) { candidate.close(); throw error; }
+  } else {
+    candidate = schema.openValidatedImport(SQL, bytes);
+  }
+  // Keep the validated candidate open, avoiding a fallible reopen after commit.
   database.close(); database = null;
-  try { await storage.replaceWorkspace(new Uint8Array(bytes)); database = open(new Uint8Array(bytes)); }
-  catch (error) { return recover(error); }
+  try {
+    await storage.replaceWorkspace(new Uint8Array(bytes));
+    database = candidate;
+  } catch (error) {
+    candidate.close();
+    return recover(error);
+  }
   return status();
 }
+
 function status() { return {...storage.metadata, state:failed ? 'failed' : 'saved', workspace:storage.name, workspaceBytes:storage.workspaceBytes, databaseMemoryBytes:SQL.HEAPU8?.buffer.byteLength ?? null, workerJSHeapBytes:performance.memory?.usedJSHeapSize ?? null, lastSave:storage.lastSave || null, metadataWarning:storage.metadataWarning || null}; }
 register('workspace.status', status);
 register('workspace.export', () => snapshot().buffer);

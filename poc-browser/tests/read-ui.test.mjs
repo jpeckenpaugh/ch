@@ -126,7 +126,7 @@ try {
   });
   await check('workspace diagnostics load', async () => {
     await route('#/workspace');
-    assert.equal(await cdp.waitFor("document.querySelector('#view').textContent.includes('company-hub')"),true);
+    assert.equal(await cdp.waitFor("document.querySelector('#view').textContent.includes('Browser storage')"),true);
   });
   await check('no API resources or browser runtime errors', async () => {
     const apiResources = await cdp.evalJs("performance.getEntriesByType('resource').map(entry=>entry.name).filter(name=>new URL(name).pathname.startsWith('/api/'))");
