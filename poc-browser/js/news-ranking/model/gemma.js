@@ -7,6 +7,14 @@ const TRANSFORMERS_URL = "https://cdn.jsdelivr.net/npm/@huggingface/transformers
 
 export function webGpuAvailable() { return typeof navigator !== "undefined" && Boolean(navigator.gpu); }
 
+function progressMessage(event) {
+  const file = event?.file ? `: ${event.file}` : "";
+  if (Number.isFinite(event?.loaded) && Number.isFinite(event?.total) && event.total > 0) {
+    return `Model ${event.status}${file} (${Math.round((event.loaded / event.total) * 100)}%)`;
+  }
+  return `Model ${event?.status ?? "loading"}${file}`;
+}
+
 export async function createGemmaRanker({onProgress} = {}) {
   if (!webGpuAvailable()) throw new Error("WebGPU is required for the Gemma benchmark in this POC.");
   const started = performance.now();
@@ -19,7 +27,7 @@ export async function createGemmaRanker({onProgress} = {}) {
   try {
     generator = await transformers.pipeline("text-generation", MODEL_ID, {
       device: "webgpu", dtype: "q4f16",
-      progress_callback: (event) => event?.status && onProgress?.(`Model ${event.status}${event.file ? `: ${event.file}` : ""}`),
+      progress_callback: (event) => event?.status && onProgress?.(progressMessage(event)),
     });
   } catch (error) { throw new Error(`Gemma could not initialize on this browser/device: ${error.message}`); }
   return {

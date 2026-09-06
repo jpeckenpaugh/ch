@@ -29,13 +29,35 @@ export async function renderNewsRanking(container) {
   container.querySelector("#run-gemma").addEventListener("click", async (event) => {
     event.currentTarget.disabled = true; status.innerHTML = `<div class="alert alert-info">Preparing Gemma…</div>`;
     const events = [];
+    let eventCount = 0;
+    const recordEvent = (message) => {
+      eventCount += 1;
+      if (events.at(-1) !== message) events.push(message);
+      if (events.length > 24) events.splice(0, events.length - 24);
+    };
+    const reportLoading = (phase, message) => {
+      if (message) recordEvent(message);
+      debug.textContent = JSON.stringify({
+        fixture,
+        state: "loading",
+        phase,
+        events,
+        eventCount,
+        note: "Gemma has not ranked candidates yet. Model download and WebGPU initialization happen before the task is passed to the model.",
+      }, null, 2);
+    };
+    reportLoading("starting", "Starting local Gemma benchmark…");
     try {
-      const model = await createGemmaRanker({onProgress: (message) => { events.push(message); status.innerHTML = `<div class="alert alert-info">${esc(message)}</div>`; }});
-      const run = await runFixture({fixture, model, onAttempt: (error) => events.push(`Retrying after validation failure: ${error.message}`)});
+      const model = await createGemmaRanker({onProgress: (message) => {
+        reportLoading("loading-model", message);
+        status.innerHTML = `<div class="alert alert-info">${esc(message)}</div>`;
+      }});
+      reportLoading("ranking", "Gemma is ranking the fixture candidates locally…");
+      const run = await runFixture({fixture, model, onAttempt: (error) => recordEvent(`Retrying after validation failure: ${error.message}`)});
       const score = scoreFixture(fixture, run.ranking);
       status.innerHTML = resultHtml(`${model.model} · ${model.backend}`, run.ranking.ranked_candidate_ids, run.ranking.reject_ids, score, `Loaded in ${model.loadMilliseconds} ms; ranked in ${run.rankingMilliseconds} ms; ${run.attempts} attempt(s).`);
-      debug.textContent = JSON.stringify({fixture, prompt: run.prompt, rawModelOutput: run.raw, validatedRanking: run.ranking, selected: run.selected, baseline: run.baseline, score, events}, null, 2);
-    } catch (error) { status.innerHTML = `<div class="alert alert-danger">${esc(error.message)}</div>`; debug.textContent = JSON.stringify({fixture, events, error: error.message}, null, 2); }
+      debug.textContent = JSON.stringify({fixture, prompt: run.prompt, rawModelOutput: run.raw, validatedRanking: run.ranking, selected: run.selected, baseline: run.baseline, score, events, eventCount}, null, 2);
+    } catch (error) { status.innerHTML = `<div class="alert alert-danger">${esc(error.message)}</div>`; debug.textContent = JSON.stringify({fixture, state: "failed", events, eventCount, error: error.message}, null, 2); }
     finally { event.currentTarget.disabled = false; }
   });
 }
