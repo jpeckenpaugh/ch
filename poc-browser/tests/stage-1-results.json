@@ -1,0 +1,59 @@
+{
+  "testedAt": "2026-09-06T17:38:35.251Z",
+  "url": "http://127.0.0.1:8011/probe.html",
+  "cdpUrl": "http://127.0.0.1:9231",
+  "results": [
+    {
+      "name": "fresh probe workspace and mutation",
+      "passed": true
+    },
+    {
+      "name": "page reload preserves mutation",
+      "passed": true
+    },
+    {
+      "name": "browser process restart preserves mutation in same profile",
+      "passed": true
+    },
+    {
+      "name": "failed persistence restores previous database and permits subsequent writes",
+      "passed": true
+    },
+    {
+      "name": "concurrent submitted mutations serialize without loss",
+      "passed": true
+    },
+    {
+      "name": "export contains SQLite file signature",
+      "passed": true
+    },
+    {
+      "name": "foreign keys remain enabled after export and mutation",
+      "passed": true
+    },
+    {
+      "diagnostics": {
+        "revision": 12,
+        "lastPersisted": "2026-09-06T17:38:35.248Z",
+        "seedVersion": "probe-v1",
+        "schemaRevision": null,
+        "state": "saved",
+        "workspace": "company-hub-probe",
+        "workspaceBytes": 12288,
+        "lastSave": {
+          "bytes": 12288,
+          "milliseconds": 1,
+          "totalMilliseconds": 1.7000000178813934
+        },
+        "metadataWarning": null,
+        "persistent": false,
+        "usage": 12921,
+        "quota": 10737431161
+      }
+    },
+    {
+      "name": "diagnostics available",
+      "passed": true
+    }
+  ]
+}

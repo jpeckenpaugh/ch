@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Company Hub persistence probe</title>
+<body><h1>Browser SQLite persistence probe</h1><p>Isolated OPFS workspace: company-hub-probe</p>
+<form id="add"><label>Value <input id="value" required></label><button>Add and save</button></form>
+<button id="refresh">Refresh</button><button id="reset">Reset probe</button><button id="fail">Fail next save</button>
+<pre id="output" aria-live="polite">Opening…</pre>
+<script type="module">
+import {db} from './js/db/client.js';
+window.probe = db;
+const output = document.querySelector('#output');
+async function refresh() { output.textContent = JSON.stringify({status:await db.status(), rows:await db.call('probe.read')}, null, 2); }
+async function run(action) { try { await action(); await refresh(); } catch(error) { output.textContent = error.message; } }
+document.querySelector('#add').onsubmit = event => {event.preventDefault(); run(() => db.call('probe.add',{value:document.querySelector('#value').value}));};
+document.querySelector('#refresh').onclick = () => run(refresh);
+document.querySelector('#reset').onclick = () => run(() => db.resetWorkspace());
+document.querySelector('#fail').onclick = () => run(() => db.call('test.failNextPersist'));
+window.probeReady = db.init().then(refresh);
+window.probeReady.catch(error => {output.textContent = error.message;});
+</script></body></html>
