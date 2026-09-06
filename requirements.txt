@@ -1,0 +1,22 @@
+# Targets Python 3.11+ (developed on 3.12). Install via ./install.sh.
+fastapi==0.141.1
+uvicorn==0.52.4
+python-multipart==0.0.32
+fpdf2==2.8.8
+
+# Persistence / migration foundation (Sprint 02)
+sqlalchemy[asyncio]==2.0.52
+alembic==1.19.2
+aiosqlite==0.22.1
+
+# Maintained auth — fastapi-users [sqlalchemy,oauth]; the [oauth] extra is
+# required for Sprint 03 Google SSO (pulls httpx-oauth, which pulls httpx).
+# Transitives pinned for reproducibility.
+fastapi-users[sqlalchemy,oauth]==15.0.5
+fastapi-users-db-sqlalchemy==7.0.0
+httpx-oauth==0.17.0
+httpx==0.28.1
+pwdlib[argon2,bcrypt]==0.3.0
+email-validator==2.3.0
+makefun==1.16.0
+pyjwt[crypto]==2.13.0

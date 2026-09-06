@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend   # live backend code (reload watches this)
+      - ./frontend:/app/frontend # live SPA — updates instantly
+      - ./data:/app/data         # persistent DB + artifacts across rebuilds
+      - ./opencode:/app/opencode
+    environment:
+      - COMPANY_HUB_ADMIN_PASSWORD=${COMPANY_HUB_ADMIN_PASSWORD:-}
+      - COMPANY_HUB_AGENT_PASSWORD=${COMPANY_HUB_AGENT_PASSWORD:-}
+      - COMPANY_HUB_GOOGLE_CLIENT_ID=${COMPANY_HUB_GOOGLE_CLIENT_ID:-}
+      - COMPANY_HUB_GOOGLE_CLIENT_SECRET=${COMPANY_HUB_GOOGLE_CLIENT_SECRET:-}
+      - COMPANY_HUB_SECURE_COOKIES=${COMPANY_HUB_SECURE_COOKIES:-}
+      - COMPANY_HUB_SESSION_TTL=${COMPANY_HUB_SESSION_TTL:-}

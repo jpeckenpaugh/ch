@@ -1,0 +1,6 @@
+# Dev-only test dependencies. Install into .venv via:
+#   .venv/bin/pip install -r requirements-dev.txt
+# httpx is no longer pinned here: it became a runtime dependency in Sprint 03
+# via the fastapi-users [oauth] extra (httpx-oauth) and now comes from
+# requirements.txt.
+pytest==9.1.1

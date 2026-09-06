@@ -1,0 +1,11 @@
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+.env
+/data/
+tmp/*
+!tmp/.gitkeep
+node_modules
+package-lock.json
+.token
