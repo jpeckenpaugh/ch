@@ -1,0 +1,40 @@
+{
+  "testedAt": "2026-09-06T17:56:56.095Z",
+  "results": [
+    {
+      "suite": "read-contract.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 95
+    },
+    {
+      "suite": "write-contract.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 85
+    },
+    {
+      "suite": "import-contract.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 76
+    },
+    {
+      "suite": "persistence.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 1817
+    },
+    {
+      "suite": "read-ui.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 3046
+    },
+    {
+      "suite": "write-ui.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 5558
+    },
+    {
+      "suite": "portability.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 2184
+    }
+  ]
+}

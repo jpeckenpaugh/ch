@@ -1,5 +1,5 @@
 {
-  "testedAt": "2026-09-06T17:44:08.832Z",
+  "testedAt": "2026-09-06T17:56:45.237Z",
   "url": "http://127.0.0.1:8011/probe.html",
   "cdpUrl": "http://127.0.0.1:9231",
   "results": [
@@ -34,16 +34,20 @@
     {
       "diagnostics": {
         "revision": 12,
-        "lastPersisted": "2026-09-06T17:44:08.829Z",
+        "lastPersisted": "2026-09-06T17:56:45.234Z",
         "seedVersion": "probe-v1",
         "schemaRevision": null,
         "state": "saved",
         "workspace": "company-hub-probe",
         "workspaceBytes": 12288,
+        "databaseMemoryBytes": 22151168,
+        "workerJSHeapBytes": null,
         "lastSave": {
           "bytes": 12288,
-          "milliseconds": 2,
-          "totalMilliseconds": 3.0999999940395355
+          "milliseconds": 2.199999988079071,
+          "totalMilliseconds": 3.2999999821186066,
+          "wasmHeapBefore": 22151168,
+          "wasmHeapAfterExport": 22151168
         },
         "metadataWarning": null,
         "persistent": false,

@@ -21,7 +21,7 @@ let cdp;
 async function requireFreePort(port) {
   const server = createServer();
   await new Promise((resolve, reject) => {
-    server.once('error', error => reject(new Error(error.code === 'EADDRINUSE' ? `Port ${port} is occupied; refusing to use or stop another process.` : `Cannot check port ${port}: ${error.code}: ${error.message}`))); 
+    server.once('error', error => reject(new Error(error.code === 'EADDRINUSE' ? `Port ${port} is occupied; refusing to use or stop another process.` : `Cannot check port ${port}: ${error.code}: ${error.message}`)));
     server.listen(port, '127.0.0.1', resolve);
   });
   await new Promise(resolve => server.close(resolve));

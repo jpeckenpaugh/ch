@@ -957,4 +957,3 @@ The POC is complete when all of the following are true:
 If those conditions hold, the experiment has answered its main question.
 
 The next architectural decision would then be whether to extend the browser workspace model into artifacts, backup/sync providers, and eventually agent execution.
-

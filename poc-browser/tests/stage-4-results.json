@@ -1,5 +1,5 @@
 {
-  "testedAt": "2026-09-06T17:55:15.697Z",
+  "testedAt": "2026-09-06T17:56:56.005Z",
   "results": [
     {
       "name": "canonical lifecycle export reset import restores persisted edits",

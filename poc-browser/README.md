@@ -33,3 +33,47 @@ temporary browser profile. They refuse occupied ports and clean only their own
 processes. Stop your POC static server before running them. Any comparison
 against FastAPI must explicitly use port 8001 and temporary data; port 8000 is
 reserved for another workflow.
+
+## Verify and regenerate
+
+For development, install the repository's pinned Python dependencies with
+`./install.sh` (seed generation only). Browser suites require Node 22+ and
+Google Chrome; set `COMPANY_HUB_TEST_CHROME` to another compatible executable
+when necessary. Tests currently use `.venv/bin/python` for their static server.
+
+```sh
+node poc-browser/tests/run.mjs
+node poc-browser/tests/run.mjs --metrics
+.venv/bin/python poc-browser/scripts/make_seed_db.py
+```
+
+The first command runs domain, import, persistence, read/write UI and portable
+workspace suites sequentially. `--metrics` adds the larger save measurements.
+Seed generation uses a temporary database and artifacts directory, canonical
+migrations and seed logic, and produces a deterministic manifest. It never
+bootstraps accounts or includes artifact rows in the browser seed.
+
+## Architecture and boundaries
+
+Views call `js/api.js`; semantic worker operations own validation and SQL.
+The worker serializes reads, mutations and workspace replacement. A successful
+mutation means the full exported database has been written and its OPFS stream
+closed. Failed persistence restores the prior saved database before rejecting.
+Revision metadata in `workspace.json` is advisory and is excluded from exports.
+
+Import validates SQLite format, canonical tables/columns, the supported schema
+revision, integrity and foreign keys before replacement. The supported revision
+is `0003_sprint03_roles`; there is no browser migration engine. Imported artifact
+metadata remains in SQLite but files/logos are not displayed or backed up by
+this POC. A `.db` export remains a standard database, not an artifact archive.
+
+This is a single-browser, single-tab personal-workspace experiment. Browser
+storage can be cleared or evicted; use exports for backups. Large saves copy
+the entire database and have increasing latency and memory cost. Native SQLite
+OPFS, binary artifacts, synchronization, authentication and agent execution
+remain outside scope. The existing OpenCode implementation remains available
+in the original server-based app.
+
+See [verification](docs/verification.md) for completion criteria and stage
+commits, and [measurements](docs/metrics.md) for observed save costs and memory
+measurement limits.

@@ -611,4 +611,3 @@ function wireNews(container, body, company, write) {
     });
   });
 }
-
