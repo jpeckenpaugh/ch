@@ -56,8 +56,8 @@ export async function renderNewsRanking(container) {
       const run = await runFixture({fixture, model, onAttempt: (error) => recordEvent(`Retrying after validation failure: ${error.message}`)});
       const score = scoreFixture(fixture, run.ranking);
       status.innerHTML = resultHtml(`${model.model} · ${model.backend}`, run.ranking.ranked_candidate_ids, run.ranking.reject_ids, score, `Loaded in ${model.loadMilliseconds} ms; ranked in ${run.rankingMilliseconds} ms; ${run.attempts} attempt(s).`);
-      debug.textContent = JSON.stringify({fixture, prompt: run.prompt, rawModelOutput: run.raw, validatedRanking: run.ranking, selected: run.selected, baseline: run.baseline, score, events, eventCount}, null, 2);
-    } catch (error) { status.innerHTML = `<div class="alert alert-danger">${esc(error.message)}</div>`; debug.textContent = JSON.stringify({fixture, state: "failed", events, eventCount, error: error.message}, null, 2); }
+      debug.textContent = JSON.stringify({fixture, prompt: run.prompt, rawModelOutput: run.raw, rawResponses: run.rawResponses ?? [run.raw], validatedRanking: run.ranking, selected: run.selected, baseline: run.baseline, score, events, eventCount}, null, 2);
+    } catch (error) { status.innerHTML = `<div class="alert alert-danger">${esc(error.message)}</div>`; debug.textContent = JSON.stringify({fixture, state: "failed", prompt: error.prompt ?? null, rawResponses: error.rawResponses ?? [], events, eventCount, error: error.message}, null, 2); }
     finally { event.currentTarget.disabled = false; }
   });
 }

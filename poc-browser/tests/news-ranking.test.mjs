@@ -14,4 +14,7 @@ let calls = 0;
 const fake = {complete: async () => ++calls === 1 ? 'nope' : '{"ranked_candidate_ids":[1,2,8],"reject_ids":[4,5,7,9]}' };
 const run = await runFixture({fixture: fixtures[0], requested: 2, model: fake});
 assert.equal(run.attempts, 2); assert.deepEqual(run.selected, [1,2]);
+assert.match(run.prompt, /<\|turn>user/); assert.equal(run.rawResponses.length, 2);
+const invalid = {complete: async () => 'not json'};
+await assert.rejects(() => runFixture({fixture: fixtures[0], requested: 2, model: invalid}), (error) => error.rawResponses?.length === 2 && error.prompt.includes("<|turn>model"));
 console.log('PASS news ranking deterministic pipeline');
