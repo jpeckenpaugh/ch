@@ -4,6 +4,7 @@ import { renderForm } from './form.js';
 import { renderIndustries } from './industries.js';
 import { db } from './db/client.js';
 import { renderWorkspace } from './workspace.js';
+import { renderNewsRanking } from './news-ranking/ui.js';
 const view = document.getElementById('view');
 export const canMutate = () => true;
 export function esc(value) {
@@ -83,6 +84,8 @@ async function render() {
   try {
     if (parts[0] === 'workspace') {
       await renderWorkspace(view);
+    } else if (parts[0] === 'news-ranking') {
+      await renderNewsRanking(view);
     } else if (parts[0] === 'industries') await renderIndustries(view);
     else if (parts[0] === 'companies' && parts[1] === 'new') await renderForm(view, null);
     else if (parts[0] === 'companies' && parts[2] === 'edit') await renderForm(view, Number(parts[1]));

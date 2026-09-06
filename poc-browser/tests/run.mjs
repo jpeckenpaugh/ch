@@ -6,6 +6,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const suites = [
   'read-contract.test.mjs', 'write-contract.test.mjs', 'import-contract.test.mjs',
   'persistence.test.mjs', 'read-ui.test.mjs', 'write-ui.test.mjs', 'portability.test.mjs',
+  'news-ranking.test.mjs',
 ];
 if (process.argv.includes('--metrics')) suites.push('metrics.test.mjs');
 const results = [];

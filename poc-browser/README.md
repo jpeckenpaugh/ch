@@ -77,3 +77,10 @@ in the original server-based app.
 See [verification](docs/verification.md) for completion criteria and stage
 commits, and [measurements](docs/metrics.md) for observed save costs and memory
 measurement limits.
+
+## Local news-ranking benchmark
+
+`#/news-ranking` is an isolated Phase 1 experiment for ranking fixture news
+candidates locally with Gemma 4 E2B and WebGPU. It does not read or modify the
+browser workspace. See [Gemma news-ranking benchmark](docs/gemma-news-ranking.md)
+for its model delivery, evaluation, and Phase 2 boundaries.

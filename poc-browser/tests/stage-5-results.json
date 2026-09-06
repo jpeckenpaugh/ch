@@ -1,40 +1,45 @@
 {
-  "testedAt": "2026-09-06T17:56:56.095Z",
+  "testedAt": "2026-09-06T20:27:53.500Z",
   "results": [
     {
       "suite": "read-contract.test.mjs",
       "exitCode": 0,
-      "milliseconds": 95
+      "milliseconds": 71
     },
     {
       "suite": "write-contract.test.mjs",
       "exitCode": 0,
-      "milliseconds": 85
+      "milliseconds": 75
     },
     {
       "suite": "import-contract.test.mjs",
       "exitCode": 0,
-      "milliseconds": 76
+      "milliseconds": 67
     },
     {
       "suite": "persistence.test.mjs",
       "exitCode": 0,
-      "milliseconds": 1817
+      "milliseconds": 1805
     },
     {
       "suite": "read-ui.test.mjs",
       "exitCode": 0,
-      "milliseconds": 3046
+      "milliseconds": 3048
     },
     {
       "suite": "write-ui.test.mjs",
       "exitCode": 0,
-      "milliseconds": 5558
+      "milliseconds": 5588
     },
     {
       "suite": "portability.test.mjs",
       "exitCode": 0,
-      "milliseconds": 2184
+      "milliseconds": 2183
+    },
+    {
+      "suite": "news-ranking.test.mjs",
+      "exitCode": 0,
+      "milliseconds": 28
     }
   ]
 }
