@@ -21,7 +21,7 @@ assert.doesNotMatch(rankingPrompt, /Existing news/);
 assert.deepEqual(validateRanking('{"ranked_candidate_ids":[1,2],"reject_ids":[3]}', candidates).ranked_candidate_ids, [1,2]);
 assert.throws(() => validateRanking('{"ranked_candidate_ids":[1,1],"reject_ids":[]}', candidates));
 assert.deepEqual(validateRejections('{"reject_ids":[3]}', candidates).reject_ids, [3]);
-assert.throws(() => validateRankedCandidates('{"ranked_candidate_ids":[1]}', candidates));
+assert.deepEqual(validateRankedCandidates('{"ranked_candidate_ids":[1]}', candidates).ranked_candidate_ids, [1]);
 let calls = 0;
 const fake = {complete: async () => {
   calls += 1;

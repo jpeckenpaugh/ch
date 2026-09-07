@@ -30,9 +30,6 @@ export function validateRejections(raw, candidates) {
 export function validateRankedCandidates(raw, candidates) {
   const value = parsed(raw);
   const ranked_candidate_ids = ids(value.ranked_candidate_ids ?? value.ranked_candidates, "ranked candidates", allowedIds(candidates), new Set());
-  if (ranked_candidate_ids.length !== candidates.length) {
-    throw new Error("Model must rank every remaining candidate exactly once");
-  }
   return {ranked_candidate_ids};
 }
 
