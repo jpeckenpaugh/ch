@@ -8,19 +8,19 @@ function json(text) {
 function nullable(value) { return typeof value === "string" && value.trim() ? value.trim() : null; }
 
 export function buildCompanyInfoPrompt({companyName, extract, industries}) {
-  const task = `Extract only the requested Company Hub fields from the Wikipedia text below. Use only information explicitly supported by the source text. Return null for any field not explicitly supported. Do not infer, guess, supplement, or add fields.\n\nReturn exactly one JSON object and no Markdown, explanation, thought text, or code fence:\n{"industry":"string or null","headquarters":{"city":"string or null","region":"string or null","country_code":"string or null"},"contact_email":"string or null","contact_phone":"string or null","description":"string or null"}\n\nAllowed industry values: ${JSON.stringify(industries)}\nCompany name: ${companyName}\n\nWikipedia text:\n${extract}`;
+  const task = `Extract only the requested Company Hub fields from the Wikipedia text below. Use only information explicitly supported by the source text. Return null for any field not explicitly supported. Do not infer, guess, supplement, or add fields. The description should be approximately 100 words.\n\nReturn exactly one JSON object and no Markdown, explanation, thought text, or code fence:\n{"industry":"string or null","headquarters":{"city":"string or null","region":"string or null","country_code":"string or null"},"contact_email":"string or null","contact_phone":"string or null","description":"string or null"}\n\nAllowed industry values: ${JSON.stringify(industries)}\nCompany name: ${companyName}\n\nWikipedia text:\n${extract}`;
   return `<|turn>user\n${task}<turn|>\n<|turn>model\n`;
 }
 
 export async function extractCompanyInfo({model, companyName, extract, industries}) {
   const prompt = buildCompanyInfoPrompt({companyName, extract, industries});
   const started = performance.now();
-  const rawResponses = [await model.complete(prompt)];
+  const rawResponses = [await model.complete(prompt, {maxNewTokens: 512})];
   let value;
   try { value = json(rawResponses[0]); }
   catch (firstError) {
     const repairPrompt = `${prompt}\nYour previous response was invalid. Return only one valid JSON object using exactly these fields: industry, headquarters, website, contact_email, contact_phone, description.`;
-    rawResponses.push(await model.complete(repairPrompt));
+    rawResponses.push(await model.complete(repairPrompt, {maxNewTokens: 512}));
     try { value = json(rawResponses[1]); }
     catch (error) {
       error.prompt = prompt;

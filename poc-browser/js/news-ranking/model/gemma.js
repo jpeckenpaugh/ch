@@ -34,8 +34,8 @@ export async function createGemmaRanker({onProgress} = {}) {
     backend: "WebGPU",
     model: "Gemma 4 E2B (q4f16 ONNX)",
     loadMilliseconds: Math.round(performance.now() - started),
-    async complete(prompt) {
-      const output = await generator(prompt, {max_new_tokens: 280, do_sample: false, return_full_text: false});
+    async complete(prompt, {maxNewTokens = 280} = {}) {
+      const output = await generator(prompt, {max_new_tokens: maxNewTokens, do_sample: false, return_full_text: false});
       return Array.isArray(output) ? output[0]?.generated_text : output?.generated_text;
     },
   };
