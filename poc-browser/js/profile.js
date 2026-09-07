@@ -469,7 +469,10 @@ function wireCompanyInfo(container, body, company, countries, write) {
           showToast("Selected company information applied"); overlay.close(); renderProfile(container, company.id);
         } catch (error) { event.currentTarget.disabled = false; result.querySelector("#company-info-error").innerHTML = `<div class="alert alert-danger mb-0">${esc(error.message)}</div>`; }
       };
-    } catch (error) { status.className = "alert alert-danger mb-0"; status.textContent = error.message; }
+    } catch (error) {
+      status.className = "alert alert-danger mb-0";
+      status.innerHTML = `${esc(error.message)}<details class="mt-2"><summary>Show debug details</summary><pre class="small text-wrap mt-2 mb-0">${esc(JSON.stringify({prompt: error.prompt ?? null, rawResponses: error.rawResponses ?? [], generationMilliseconds: error.generationMilliseconds ?? null, error: error.message}, null, 2))}</pre></details>`;
+    }
   });
 }
 

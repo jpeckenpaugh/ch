@@ -14,9 +14,23 @@ export function buildCompanyInfoPrompt({companyName, extract, industries}) {
 
 export async function extractCompanyInfo({model, companyName, extract, industries}) {
   const prompt = buildCompanyInfoPrompt({companyName, extract, industries});
-  const value = json(await model.complete(prompt));
+  const started = performance.now();
+  const rawResponses = [await model.complete(prompt)];
+  let value;
+  try { value = json(rawResponses[0]); }
+  catch (firstError) {
+    const repairPrompt = `${prompt}\nYour previous response was invalid. Return only one valid JSON object using exactly these fields: industry, headquarters, website, contact_email, contact_phone, description.`;
+    rawResponses.push(await model.complete(repairPrompt));
+    try { value = json(rawResponses[1]); }
+    catch (error) {
+      error.prompt = prompt;
+      error.rawResponses = rawResponses;
+      error.generationMilliseconds = Math.round(performance.now() - started);
+      throw error;
+    }
+  }
   const headquarters = value?.headquarters && typeof value.headquarters === "object" ? {
     city: nullable(value.headquarters.city), region: nullable(value.headquarters.region), country_code: nullable(value.headquarters.country_code)?.toUpperCase() ?? null,
   } : null;
-  return {industry: nullable(value?.industry), headquarters, website: nullable(value?.website), contact_email: nullable(value?.contact_email), contact_phone: nullable(value?.contact_phone), description: nullable(value?.description), prompt};
+  return {industry: nullable(value?.industry), headquarters, website: nullable(value?.website), contact_email: nullable(value?.contact_email), contact_phone: nullable(value?.contact_phone), description: nullable(value?.description), prompt, rawResponses, generationMilliseconds: Math.round(performance.now() - started)};
 }
