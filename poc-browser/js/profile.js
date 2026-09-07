@@ -1,6 +1,8 @@
 import {
   getCompany,
   listCountries,
+  listIndustries,
+  updateCompany,
   createLocation,
   updateLocation,
   deleteLocation,
@@ -15,6 +17,8 @@ import {
 import { collectCurrentsCandidates } from "./news-ranking/currents.js";
 import { runLiveRanking } from "./news-ranking/controller.js";
 import { createGemmaRanker } from "./news-ranking/model/gemma.js";
+import { fetchCompanyWikipediaExtract } from "./company-info/wikipedia.js";
+import { extractCompanyInfo } from "./company-info/extractor.js";
 import {
   esc,
   completenessBadge,
@@ -55,7 +59,7 @@ export async function renderProfile(container, companyId) {
   body.innerHTML = `
     <div class="row g-4">
       <div class="col-lg-7">
-        ${mainCard(company)}
+        ${mainCard(company, write)}
         ${write ? `
         <div class="d-flex gap-2 flex-wrap mb-4">
           <a href="#/companies/${company.id}/edit" class="btn btn-outline-secondary">
@@ -77,11 +81,12 @@ export async function renderProfile(container, companyId) {
     </div>`;
 
   wireLocations(container, body, company, countries, write);
+  wireCompanyInfo(container, body, company, countries, write);
   wireReferences(container, body, company, write);
   wireNews(container, body, company, write);
 }
 
-function mainCard(company) {
+function mainCard(company, write) {
   return `
     <div class="card mb-4">
       <div class="card-body">
@@ -91,6 +96,7 @@ function mainCard(company) {
           </div>
           ${completenessBadge(company)}
         </div>
+        ${write ? `<button class="btn btn-sm btn-outline-primary mb-3" id="find-info-btn"><i class="bi bi-search me-1"></i>Find info</button>` : ""}
         <dl class="row profile-dl mb-0">
           ${detailRow("Industry", company.industry ? esc(company.industry.name) : "")}
           ${detailRow("Headquarters", esc(company.hq_location))}
@@ -422,6 +428,49 @@ function newsEditorHtml(item = null) {
       </div>
       <div class="news-editor-error mt-2"></div>
     </form>`;
+}
+
+function wireCompanyInfo(container, body, company, countries, write) {
+  const button = body.querySelector("#find-info-btn");
+  if (!button || !write) return;
+  button.addEventListener("click", async () => {
+    const overlay = openNewsOverlay("Find company info", `<div id="company-info-status" class="alert alert-info mb-0">Searching Wikipedia for ${esc(company.name)}…</div>`);
+    const status = overlay.content.querySelector("#company-info-status");
+    try {
+      const source = await fetchCompanyWikipediaExtract(company.name);
+      status.textContent = `Loading Gemma to extract requested fields from Wikipedia: ${source.title}…`;
+      const industries = await listIndustries();
+      const model = await createGemmaRanker({onProgress: message => { status.textContent = message; }});
+      status.textContent = "Extracting requested company fields…";
+      const proposal = await extractCompanyInfo({model, companyName: company.name, extract: source.extract, industries: industries.map(item => item.name)});
+      const industry = industries.find(item => item.name.toLocaleLowerCase() === proposal.industry?.toLocaleLowerCase()) || null;
+      const country = countries.find(item => item.code === proposal.headquarters?.country_code) || null;
+      const fields = [
+        ["industry", "Industry", industry?.name ?? null],
+        ["headquarters", "Headquarters", proposal.headquarters?.city && country ? `${proposal.headquarters.city}${proposal.headquarters.region ? `, ${proposal.headquarters.region}` : ""}, ${country.name}` : null],
+        ["website", "Website", proposal.website], ["contact_email", "Contact email", proposal.contact_email],
+        ["contact_phone", "Contact phone", proposal.contact_phone], ["description", "Description", proposal.description],
+      ];
+      const rows = fields.map(([key, label, value]) => value ? `<div class="form-check border-bottom py-2"><input class="form-check-input info-field" type="checkbox" value="${key}" id="info-${key}" checked><label class="form-check-label" for="info-${key}"><strong>${label}</strong><span class="d-block small text-secondary">${esc(value)}</span></label></div>` : `<div class="border-bottom py-2"><strong>${label}</strong><span class="d-block small text-secondary">No value found</span></div>`).join("");
+      status.outerHTML = `<div id="company-info-result"><p class="small text-secondary">Wikipedia: <a href="${esc(source.url)}" target="_blank" rel="noopener">${esc(source.title)}</a></p>${rows}<div class="d-flex gap-2 pt-3"><button class="btn btn-primary" id="apply-company-info">Apply selected</button><button class="btn btn-outline-secondary" id="cancel-company-info">Cancel</button></div><div id="company-info-error" class="mt-3"></div></div>`;
+      const result = overlay.content.querySelector("#company-info-result");
+      result.querySelector("#cancel-company-info").onclick = overlay.close;
+      result.querySelector("#apply-company-info").onclick = async event => {
+        const selected = new Set([...result.querySelectorAll(".info-field:checked")].map(input => input.value));
+        event.currentTarget.disabled = true;
+        try {
+          const data = {name: company.name, industry_id: selected.has("industry") ? industry.id : company.industry?.id ?? null, website: selected.has("website") ? proposal.website : company.website, contact_email: selected.has("contact_email") ? proposal.contact_email : company.contact_email, contact_phone: selected.has("contact_phone") ? proposal.contact_phone : company.contact_phone, description: selected.has("description") ? proposal.description : company.description};
+          await updateCompany(company.id, data);
+          if (selected.has("headquarters")) {
+            const existing = company.locations.find(location => location.type === "Headquarters");
+            const location = {label: existing?.label || "Headquarters", address: existing?.address ?? null, city: proposal.headquarters.city, country_code: country.code, type: "Headquarters"};
+            if (existing) await updateLocation(company.id, existing.id, location); else await createLocation(company.id, location);
+          }
+          showToast("Selected company information applied"); overlay.close(); renderProfile(container, company.id);
+        } catch (error) { event.currentTarget.disabled = false; result.querySelector("#company-info-error").innerHTML = `<div class="alert alert-danger mb-0">${esc(error.message)}</div>`; }
+      };
+    } catch (error) { status.className = "alert alert-danger mb-0"; status.textContent = error.message; }
+  });
 }
 
 function wireLocations(container, body, company, countries, write) {
