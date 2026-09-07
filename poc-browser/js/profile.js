@@ -10,7 +10,11 @@ import {
   createNews,
   updateNews,
   deleteNews,
+  getSetting,
 } from "./api.js";
+import { collectCurrentsCandidates } from "./news-ranking/currents.js";
+import { runLiveRanking } from "./news-ranking/controller.js";
+import { createGemmaRanker } from "./news-ranking/model/gemma.js";
 import {
   esc,
   completenessBadge,
@@ -615,31 +619,58 @@ function wireNews(container, body, company, write) {
   function openFinder() {
     editingId = null;
     const overlay = openNewsOverlay("Find recent news", newsFinderHtml());
-    const source = overlay.content.querySelector("#find-news-source");
+    const count = overlay.content.querySelector("#find-news-count");
     const status = overlay.content.querySelector("#find-news-status");
     overlay.content.querySelector(".news-finder-cancel").addEventListener("click", overlay.close);
-    overlay.content.querySelector("#find-news-run").addEventListener("click", () => {
-      const url = newsSearchUrl(source.value, company.name);
-      const search = window.open(url, "_blank", "noopener");
-      if (search) search.opener = null;
-      status.innerHTML = `<div class="alert alert-success py-2 mb-0">Opened ${esc(source.options[source.selectedIndex].text)} for ${esc(company.name)} in a new tab. Review an article there, then use <strong>Add news</strong> to save it here.</div>`;
+    const run = overlay.content.querySelector("#find-news-run");
+    run.addEventListener("click", async () => {
+      run.disabled = true;
+      status.innerHTML = `<div class="alert alert-info py-2 mb-0">Finding recent Currents candidates for ${esc(company.name)}…</div>`;
+      try {
+        const apiKey = (await getSetting("news.currents.api_key"))?.value;
+        if (!apiKey) throw new Error('Add your Currents API key in Workspace before finding news.');
+        const collected = await collectCurrentsCandidates({company, apiKey, limit: 10});
+        if (!collected.length) throw new Error("Currents returned no usable recent articles for this company.");
+        status.innerHTML = `<div class="alert alert-info py-2 mb-0">Loading Gemma to rank ${collected.length} Currents candidates locally…</div>`;
+        const model = await createGemmaRanker({onProgress: (message) => { status.innerHTML = `<div class="alert alert-info py-2 mb-0">${esc(message)}</div>`; }});
+        status.innerHTML = `<div class="alert alert-info py-2 mb-0">Ranking candidate articles locally…</div>`;
+        const result = await runLiveRanking({company, existingNews: company.news || [], requested: Number(count.value), model, collectCandidates: async () => collected});
+        if (!result.selected.length) throw new Error("Gemma did not select any usable articles.");
+        renderFinderPreview(result, status, overlay, company, container);
+      } catch (err) {
+        status.innerHTML = `<div class="alert alert-danger py-2 mb-0">${esc(err.message)}</div>`;
+        run.disabled = false;
+      }
     });
   }
 }
 
 function newsFinderHtml() {
   return `<div id="news-finder">
-    <p class="text-secondary small">Choose a source for recent coverage. Search results open in a new tab; add only the articles you choose to this company.</p>
-    <div class="row g-2 align-items-end"><div class="col-sm-6"><label class="form-label small mb-1" for="find-news-source">News source</label><select class="form-select form-select-sm" id="find-news-source"><option value="bing" selected>Bing News</option><option value="yahoo">Yahoo News</option></select></div><div class="col-sm-6 d-flex gap-2"><button class="btn btn-sm btn-primary" id="find-news-run"><i class="bi bi-box-arrow-up-right me-1"></i>Open search</button><button class="btn btn-sm btn-outline-secondary news-finder-cancel">Cancel</button></div></div>
+    <p class="text-secondary small">Currents provides candidates using your browser-local API key. Gemma ranks them locally; nothing is added until you confirm.</p>
+    <div class="row g-2 align-items-end"><div class="col-sm-4"><label class="form-label small mb-1" for="find-news-source">News source</label><select class="form-select form-select-sm" id="find-news-source"><option value="currents" selected>Currents News API</option></select></div><div class="col-sm-3"><label class="form-label small mb-1" for="find-news-count">Articles</label><select class="form-select form-select-sm" id="find-news-count"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></div><div class="col-sm-5 d-flex gap-2"><button class="btn btn-sm btn-primary" id="find-news-run"><i class="bi bi-stars me-1"></i>Find and rank</button><button class="btn btn-sm btn-outline-secondary news-finder-cancel">Cancel</button></div></div>
     <div class="mt-3" id="find-news-status"></div>
   </div>`;
 }
 
-function newsSearchUrl(source, companyName) {
-  const query = encodeURIComponent(companyName);
-  return source === "yahoo"
-    ? `https://news.search.yahoo.com/search?p=${query}`
-    : `https://www.bing.com/news/search?q=${query}&form=YFNR`;
+function renderFinderPreview(result, status, overlay, company, container) {
+  const rows = result.selected.map((item, index) => `<div class="form-check border-bottom py-2"><input class="form-check-input news-candidate" type="checkbox" value="${item.candidate_id}" id="candidate-${item.candidate_id}" checked><label class="form-check-label w-100" for="candidate-${item.candidate_id}"><span class="fw-semibold">${index + 1}. ${esc(item.title)}</span><span class="d-block small text-secondary">${esc(item.publisher)} · ${esc(item.published_at)}</span><span class="d-block small text-secondary">${esc(item.snippet)}</span></label></div>`).join("");
+  status.innerHTML = `<div class="alert alert-success py-2">Gemma ranked ${result.candidates.length} new Currents candidates. Review the selected articles before adding them.</div><div class="border rounded p-2">${rows}<div class="d-flex gap-2 pt-3"><button class="btn btn-sm btn-primary" id="confirm-found-news">Add selected news</button><button class="btn btn-sm btn-outline-secondary" id="cancel-found-news">Cancel</button></div></div>`;
+  status.querySelector("#cancel-found-news").addEventListener("click", overlay.close);
+  status.querySelector("#confirm-found-news").addEventListener("click", async (event) => {
+    const chosen = new Set([...status.querySelectorAll(".news-candidate:checked")].map((input) => Number(input.value)));
+    const selected = result.selected.filter((item) => chosen.has(item.candidate_id));
+    if (!selected.length) return;
+    event.currentTarget.disabled = true;
+    try {
+      for (const item of selected) await createNews(company.id, {title: item.title, source: item.publisher, url: item.url, published_at: item.published_at, summary: item.snippet, is_scraped: true});
+      showToast(`${selected.length} news article${selected.length === 1 ? "" : "s"} added`);
+      overlay.close(); renderProfile(container, company.id);
+    } catch (err) {
+      event.currentTarget.disabled = false;
+      status.insertAdjacentHTML("afterbegin", `<div class="alert alert-danger py-2">${esc(err.message)}</div>`);
+    }
+  });
 }
 
 function openNewsOverlay(title, content) {

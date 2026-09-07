@@ -1,4 +1,6 @@
 import {db} from './db/client.js';
+import {deleteSetting, getSetting, setSetting} from './api.js';
+import {collectCurrentsCandidates} from './news-ranking/currents.js';
 import {esc, formatSize} from './app.js';
 
 export async function renderWorkspace(container) {
@@ -18,6 +20,21 @@ export async function renderWorkspace(container) {
         <div id="workspace-message" role="status" aria-live="polite"></div>
       </div>
     </div>`;
+  container.insertAdjacentHTML('beforeend', `
+    <div class="card mx-auto mt-4" style="max-width:760px">
+      <div class="card-body">
+        <h2 class="h5">News providers</h2>
+        <p class="text-secondary small">Configure a personal Currents API key to find candidates that Gemma can rank locally.</p>
+        <p class="small mb-3"><a href="https://currentsapi.services/en/register" target="_blank" rel="noopener">Get a free Currents API key</a></p>
+        <div id="currents-key-state" class="small mb-2">Checking configuration…</div>
+        <div class="input-group">
+          <input id="currents-api-key" class="form-control" type="password" autocomplete="off" placeholder="Paste your Currents API key" aria-label="Currents API key">
+          <button id="currents-save" class="btn btn-primary">Save key</button>
+        </div>
+        <div class="d-flex gap-2 mt-2"><button id="currents-test" class="btn btn-sm btn-outline-primary">Test key</button><button id="currents-remove" class="btn btn-sm btn-outline-danger">Remove key</button></div>
+        <div id="currents-message" class="small mt-3" role="status" aria-live="polite"></div>
+      </div>
+    </div>`);
   const statusElement = container.querySelector('#workspace-status');
   const message = container.querySelector('#workspace-message');
   const fileInput = container.querySelector('#workspace-file');
@@ -92,4 +109,41 @@ export async function renderWorkspace(container) {
     });
   };
   await refresh();
+  const currentsKey = 'news.currents.api_key';
+  const keyInput = container.querySelector('#currents-api-key');
+  const keyState = container.querySelector('#currents-key-state');
+  const keyMessage = container.querySelector('#currents-message');
+  const keyButtons = [...container.querySelectorAll('#currents-save,#currents-test,#currents-remove')];
+  let savedKey = '';
+  function mask(value) { return value ? `Configured ••••${value.slice(-4)}` : 'No Currents API key saved.'; }
+  async function refreshKey() {
+    savedKey = (await getSetting(currentsKey))?.value || '';
+    keyState.textContent = mask(savedKey);
+    container.querySelector('#currents-remove').disabled = !savedKey;
+    container.querySelector('#currents-test').disabled = !savedKey;
+  }
+  async function performKey(action) {
+    keyButtons.forEach(button => { button.disabled = true; });
+    keyMessage.className = 'small mt-3 text-secondary';
+    try {
+      const result = await action();
+      keyMessage.className = 'small mt-3 text-success'; keyMessage.textContent = result;
+      await refreshKey();
+    } catch (error) { keyMessage.className = 'small mt-3 text-danger'; keyMessage.textContent = error.message; }
+    finally { keyButtons.forEach(button => { button.disabled = false; }); await refreshKey(); }
+  }
+  container.querySelector('#currents-save').onclick = () => performKey(async () => {
+    const value = keyInput.value.trim();
+    if (!value) throw new Error('Paste an API key to save it.');
+    await setSetting(currentsKey, value); keyInput.value = '';
+    return 'Currents API key saved in this browser workspace.';
+  });
+  container.querySelector('#currents-test').onclick = () => performKey(async () => {
+    const results = await collectCurrentsCandidates({company: {name: 'Toyota'}, apiKey: savedKey, limit: 1});
+    return `Connection succeeded. Currents returned ${results.length} usable Toyota article${results.length === 1 ? '' : 's'}.`;
+  });
+  container.querySelector('#currents-remove').onclick = () => performKey(async () => {
+    await deleteSetting(currentsKey); return 'Currents API key removed from this browser workspace.';
+  });
+  await refreshKey();
 }

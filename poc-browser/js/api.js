@@ -18,3 +18,6 @@ export const deleteReference = (companyId, id) => db.call('references.delete', {
 export const createNews = (companyId, data) => db.call('news.add', {companyId, data});
 export const updateNews = (companyId, id, data) => db.call('news.update', {companyId, id, data});
 export const deleteNews = (companyId, id) => db.call('news.delete', {companyId, id});
+export const getSetting = (key) => db.call('settings.get', {key});
+export const setSetting = (key, value) => db.call('settings.set', {data: {key, value}});
+export const deleteSetting = (key) => db.call('settings.delete', {data: {key}});

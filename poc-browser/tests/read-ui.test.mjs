@@ -111,7 +111,7 @@ try {
     await cdp.evalJs("document.querySelector('.modal.show [data-bs-dismiss=modal]').click()");
     assert.equal(await cdp.waitFor("!document.querySelector('.modal.show')"), true, 'add-news overlay closes');
     await cdp.evalJs("document.querySelector('#find-news-btn').click()");
-    assert.equal(await cdp.waitFor("document.querySelector('.modal.show #find-news-source')?.options.length === 2"), true, 'find-news overlay offers Bing and Yahoo');
+    assert.equal(await cdp.waitFor("document.querySelector('.modal.show #find-news-source')?.value === 'currents' && Boolean(document.querySelector('.modal.show #find-news-count'))"), true, 'find-news overlay offers Currents ranking');
     await cdp.evalJs("document.querySelector('.modal.show [data-bs-dismiss=modal]').click()");
     const text = await cdp.evalJs("document.querySelector('#profile-body').textContent");
     for (const label of ['Locations','References','News','Files']) assert.ok(text.includes(label), label);
@@ -135,6 +135,10 @@ try {
   await check('workspace diagnostics load', async () => {
     await route('#/workspace');
     assert.equal(await cdp.waitFor("document.querySelector('#view').textContent.includes('Browser storage')"),true);
+    assert.equal(await cdp.evalJs("Boolean(document.querySelector('#currents-api-key,#currents-save,#currents-test'))"),true);
+    await cdp.evalJs("window.companyHub.db.call('settings.set',{data:{key:'news.currents.api_key',value:'test-key'}})");
+    assert.equal(await cdp.evalJs("window.companyHub.db.call('settings.get',{key:'news.currents.api_key'}).then(row=>row.value)"), 'test-key');
+    await cdp.evalJs("window.companyHub.db.call('settings.delete',{data:{key:'news.currents.api_key'}})");
   });
   await check('no API resources or browser runtime errors', async () => {
     const apiResources = await cdp.evalJs("performance.getEntriesByType('resource').map(entry=>entry.name).filter(name=>new URL(name).pathname.startsWith('/api/'))");

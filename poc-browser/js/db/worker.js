@@ -10,6 +10,13 @@ function query(sql, params = []) {
   finally { statement.free(); }
 }
 function open(bytes) { const db = new SQL.Database(bytes); db.run('PRAGMA foreign_keys=ON'); return db; }
+function ensureWorkspaceSettings() {
+  if (!probe) database.run(`CREATE TABLE IF NOT EXISTS workspace_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+}
 async function initialize() {
   if (failed) throw failed;
   if (initialized) return;
@@ -21,6 +28,7 @@ async function initialize() {
   database = open(await storage.openWorkspace(seed));
   if (!probe) { schema = await import('./schema.js'); schema.validateSchema(database); }
   if (!probe) {
+    ensureWorkspaceSettings();
     const {registerOperations} = await import('./repo/index.js');
     registerOperations({register, query, run:(sql,params=[])=>database.run(sql,params)});
   }
@@ -63,6 +71,7 @@ async function replace(bytes) {
   try {
     await storage.replaceWorkspace(new Uint8Array(bytes));
     database = candidate;
+    ensureWorkspaceSettings();
   } catch (error) {
     candidate.close();
     return recover(error);

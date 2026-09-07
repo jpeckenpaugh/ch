@@ -14,7 +14,7 @@ export async function runFixture({fixture, requested = 3, model, onAttempt}) {
 export async function runLiveRanking({company, existingNews, requested = 3, model, collectCandidates, onAttempt}) {
   const collected = await collectCandidates({company, existingNews, limit: 10});
   const candidates = excludeExistingNews(normalizeCandidates(collected), existingNews);
-  if (!candidates.length) throw new Error("GDELT returned no new usable candidates for this company.");
+  if (!candidates.length) throw new Error("The news provider returned no new usable candidates for this company.");
   const context = {company, existingNews: normalizeExistingNews(existingNews).slice(0, 12), candidates, requested};
   const started = performance.now();
   const result = await rankWithRetry({model, context, onAttempt});

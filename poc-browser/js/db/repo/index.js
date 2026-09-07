@@ -5,6 +5,7 @@ import {locationOperations} from './locations.js';
 import {registerReferences} from './references.js';
 import {registerNews} from './news.js';
 import {registerCompanyWrites} from './company-writes.js';
+import {registerSettings} from './settings.js';
 import {error} from './validation.js';
 // Helpers are closures over the current worker DB, never a retained DB handle.
 export function registerOperations(context) {
@@ -33,4 +34,5 @@ export function registerOperations(context) {
   registerReferences(context);
   registerNews(context);
   registerCompanyWrites(context,companies,locations);
+  registerSettings(context);
 }
