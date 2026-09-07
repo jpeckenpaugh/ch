@@ -163,33 +163,27 @@ Record:
 Gemma receives:
 
 * concise company identity/context
-* bounded existing-news context
-* 10 candidate articles
-* requested number of articles
-* ranking criteria
+* up to 10 candidate articles
+* screening or ranking criteria
 
-The task is only to rank and reject candidates.
+Before prompting, JavaScript deterministically removes candidates that match
+existing news. Gemma then performs two independent calls: first it screens
+candidates for rejection, then it ranks every surviving candidate.
 
-Example instruction:
+The screening call returns only rejected IDs. It rejects an article only when
+it is not directly about the company, is tangential, trivial, unsupported, or
+otherwise unsuitable for a company-intelligence workspace. It does not reject
+an article merely because another candidate is stronger.
 
-```text
-Rank these candidate news articles for inclusion in Company Hub.
+The ranking call receives only survivors and orders every supplied ID from best
+to worst. The UI uses the first one to five IDs requested by the user.
 
-Prefer articles that are:
-- directly relevant to the company
-- substantive
-- recent
-- credible
-- distinct from existing news
-- distinct from other candidates
+Example screening output:
 
-Reject articles that are:
-- tangential
-- duplicate coverage
-- trivial or low-value
-- unsupported by the supplied metadata
-
-Return JSON only.
+```json
+{
+  "reject_ids": [3, 5]
+}
 ```
 
 The model does not:
@@ -204,37 +198,11 @@ The model does not:
 
 # 8. Output contract
 
-During development, use:
+The ranking call returns only ranked IDs:
 
 ```json
 {
-  "ranked_candidates": [
-    {
-      "candidate_id": 7,
-      "reason": "Major strategic announcement with direct company impact"
-    },
-    {
-      "candidate_id": 2,
-      "reason": "Recent credible earnings coverage"
-    }
-  ],
-  "rejects": [
-    {
-      "candidate_id": 5,
-      "reason": "Duplicate coverage of candidate 7"
-    }
-  ]
-}
-```
-
-Do not require model confidence scores.
-
-Once behavior is stable, the output may be reduced to:
-
-```json
-{
-  "ranked_candidate_ids": [7, 2, 9, 4],
-  "reject_ids": [3, 5, 6, 8, 10]
+  "ranked_candidate_ids": [7, 2, 9, 4]
 }
 ```
 
@@ -250,7 +218,6 @@ Reject outputs with:
 * missing required fields
 * invalid candidate IDs
 * duplicate IDs
-* overlap between ranked and rejected IDs
 
 Permit one bounded repair/retry pass if output is malformed.
 
@@ -258,13 +225,9 @@ If the second attempt also fails, mark the ranking as failed.
 
 Do not silently repair arbitrary model output.
 
-If Gemma returns fewer valid ranked candidates than requested:
-
-* use only the valid ranked candidates
-* report the shortfall
-* do not auto-fill with unranked items
-
-If Gemma rejects everything, return an empty result rather than forcing selection.
+The screening response may omit any viable ID. The ranking response must include
+every surviving candidate ID exactly once. If screening rejects everything,
+report that no usable candidate remains rather than forcing selection.
 
 ---
 
@@ -559,4 +522,3 @@ Everything else remains deterministic.
 The POC should answer one question:
 
 > **Is Gemma 4 E2B good enough, fast enough, and stable enough in-browser to provide useful semantic ranking over 10 preprocessed Company Hub news candidates?**
-

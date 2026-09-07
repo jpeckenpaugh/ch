@@ -19,12 +19,15 @@ browser thereafter.
 
 ## Benchmark contract
 
-Every fixture has a company, bounded existing-news context, ten structured
-candidates, acceptable top candidates, and obvious rejects. The model sees no
-tools and cannot access SQLite, OPFS, or network search. It returns ranked and
-rejected candidate IDs. JavaScript validates candidate IDs and disjointness,
-permits exactly one retry after malformed output, and reports shortfalls rather
-than inserting unranked results.
+Every fixture has a company, existing-news data for deterministic filtering,
+ten structured candidates, acceptable top candidates, and obvious rejects.
+Before Gemma runs, JavaScript removes candidates that duplicate existing news;
+the model receives only the remaining candidates. Gemma then runs twice: a
+screening call returns rejected candidate IDs, and a separate ranking call
+orders every surviving ID from best to worst. The model sees no tools and
+cannot access SQLite, OPFS, or network search. JavaScript validates each
+response, permits exactly one retry after malformed output, and reports
+shortfalls rather than inserting unranked results.
 
 The deterministic baseline ranks publisher tier and recency. Evaluation records
 top-three label hits and whether obvious rejects were rejected or kept out of
@@ -35,12 +38,23 @@ retry, and selection checks.
 ## Live candidate discovery
 
 The company profile's **Find news** control is the Phase 2 entry point. It
-searches GDELT's public DOC ArticleList API for the company name, requests up
-to 25 recent results, normalizes and removes exact duplicates, then sends at
-most ten new candidates to Gemma. GDELT is discovery only: the user reviews
+searches the Currents News API for the company name. Before using this flow,
+the workspace owner adds a personal Currents API key in **Workspace → News
+providers**; the browser sends that key with the Currents search request.
+
+The finder requests up to ten recent English-language candidates, normalizes
+them, removes candidates already represented in the company's news, and sends
+the remaining candidates to Gemma for screening. JavaScript removes the
+rejected IDs, then a separate Gemma call ranks every survivor. Existing news is
+not included in either model prompt. The user chooses how many ranked articles
+to review (one to five). Nothing is written automatically: the user reviews
 Gemma's selected articles and explicitly confirms before `createNews()` writes
-them to the local workspace. GDELT may rate-limit a public IP; that is surfaced
-as a retryable error and never causes a partial write.
+them to the local workspace.
+
+Missing or rejected keys, request-limit responses, unavailable service, and
+empty usable results are displayed in the finder. These cases do not create
+partial news records. The Workspace screen also provides controls to test,
+replace, or remove the configured Currents key.
 
 ## Phase 2 boundary
 
