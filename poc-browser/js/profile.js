@@ -11,6 +11,9 @@ import {
   updateNews,
   deleteNews,
 } from "./api.js";
+import { collectNewsCandidates } from "./news-ranking/gdelt.js";
+import { runLiveRanking } from "./news-ranking/controller.js";
+import { createGemmaRanker } from "./news-ranking/model/gemma.js";
 import {
   esc,
   completenessBadge,
@@ -253,6 +256,9 @@ function newsCard(company, write) {
         <div class="d-flex gap-2 align-items-center">
           <span class="badge text-bg-light border">${news.length}</span>
           ${write ? `
+          <button class="btn btn-sm btn-outline-primary" id="find-news-btn">
+            <i class="bi bi-stars me-1"></i>Find news
+          </button>
           <button class="btn btn-sm btn-outline-primary" id="add-news-btn">
             <i class="bi bi-plus-lg me-1"></i>Add news
           </button>` : ""}
@@ -592,6 +598,8 @@ function wireNews(container, body, company, write) {
 
   const addNewsBtn = body.querySelector("#add-news-btn");
   if (addNewsBtn) addNewsBtn.addEventListener("click", () => openEditor(null));
+  const findNewsBtn = body.querySelector("#find-news-btn");
+  if (findNewsBtn) findNewsBtn.addEventListener("click", () => openFinder());
   body.querySelectorAll(".edit-news").forEach((btn) => {
     btn.addEventListener("click", () => {
       const item = (company.news || []).find((n) => n.id === Number(btn.dataset.id));
@@ -609,5 +617,65 @@ function wireNews(container, body, company, write) {
         showToast(err.message, "danger");
       }
     });
+  });
+
+  function openFinder() {
+    editingId = null;
+    editor.innerHTML = newsFinderHtml();
+    editor.classList.remove("d-none");
+    const count = editor.querySelector("#find-news-count");
+    const status = editor.querySelector("#find-news-status");
+    const run = editor.querySelector("#find-news-run");
+    const cancel = editor.querySelector(".news-finder-cancel");
+    cancel.addEventListener("click", () => { editor.classList.add("d-none"); editor.innerHTML = ""; });
+    run.addEventListener("click", async () => {
+      run.disabled = true;
+      status.innerHTML = `<div class="alert alert-info py-2 mb-0">Searching GDELT for recent coverage…</div>`;
+      try {
+        const collected = await collectNewsCandidates({company, existingNews: company.news || [], limit: 10});
+        if (!collected.length) throw new Error("GDELT returned no usable recent articles for this company.");
+        status.innerHTML = `<div class="alert alert-info py-2 mb-0">Loading Gemma to rank ${collected.length} GDELT candidates locally…</div>`;
+        const model = await createGemmaRanker({onProgress: (message) => { status.innerHTML = `<div class="alert alert-info py-2 mb-0">${esc(message)}</div>`; }});
+        status.innerHTML = `<div class="alert alert-info py-2 mb-0">Ranking candidate articles locally…</div>`;
+        const result = await runLiveRanking({company, existingNews: company.news || [], requested: Number(count.value), model, collectCandidates: async () => collected});
+        if (!result.selected.length) {
+          status.innerHTML = `<div class="alert alert-warning py-2 mb-0">Gemma did not select any usable articles.</div>`;
+          run.disabled = false;
+          return;
+        }
+        renderFinderPreview(result, status, editor, company, container);
+      } catch (err) {
+        status.innerHTML = `<div class="alert alert-danger py-2 mb-0">${esc(err.message)}</div>`;
+        run.disabled = false;
+      }
+    });
+  }
+}
+
+function newsFinderHtml() {
+  return `<div class="border-top pt-3" id="news-finder">
+    <div class="d-flex justify-content-between gap-2 align-items-start mb-2"><div><strong>Find recent news</strong><div class="small text-secondary">GDELT finds candidates; Gemma ranks them locally. Nothing is added until you confirm.</div></div></div>
+    <div class="row g-2 align-items-end"><div class="col-sm-4"><label class="form-label small mb-1" for="find-news-count">Articles</label><select class="form-select form-select-sm" id="find-news-count"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></div><div class="col-sm-8 d-flex gap-2"><button class="btn btn-sm btn-primary" id="find-news-run"><i class="bi bi-stars me-1"></i>Find and rank</button><button class="btn btn-sm btn-outline-secondary news-finder-cancel">Cancel</button></div></div>
+    <div class="mt-3" id="find-news-status"></div>
+  </div>`;
+}
+
+function renderFinderPreview(result, status, editor, company, container) {
+  const rows = result.selected.map((item, index) => `<div class="form-check border-bottom py-2"><input class="form-check-input news-candidate" type="checkbox" value="${item.candidate_id}" id="candidate-${item.candidate_id}" checked><label class="form-check-label w-100" for="candidate-${item.candidate_id}"><span class="fw-semibold">${index + 1}. ${esc(item.title)}</span><span class="d-block small text-secondary">${esc(item.publisher)} · ${esc(item.published_at)}</span><span class="d-block small text-secondary">${esc(item.snippet)}</span></label></div>`).join("");
+  status.innerHTML = `<div class="alert alert-success py-2">Gemma ranked ${result.candidates.length} new GDELT candidates. Review the selected articles before adding them.</div><div class="border rounded p-2">${rows}<div class="d-flex gap-2 pt-3"><button class="btn btn-sm btn-primary" id="confirm-found-news">Add selected news</button><button class="btn btn-sm btn-outline-secondary" id="cancel-found-news">Cancel</button></div></div>`;
+  status.querySelector("#cancel-found-news").addEventListener("click", () => { editor.classList.add("d-none"); editor.innerHTML = ""; });
+  status.querySelector("#confirm-found-news").addEventListener("click", async (event) => {
+    const chosen = new Set([...status.querySelectorAll(".news-candidate:checked")].map((input) => Number(input.value)));
+    const selected = result.selected.filter((item) => chosen.has(item.candidate_id));
+    if (!selected.length) return;
+    event.currentTarget.disabled = true;
+    try {
+      for (const item of selected) await createNews(company.id, {title: item.title, source: item.publisher, url: item.url, published_at: item.published_at, summary: item.snippet, is_scraped: true});
+      showToast(`${selected.length} news article${selected.length === 1 ? "" : "s"} added`);
+      renderProfile(container, company.id);
+    } catch (err) {
+      event.currentTarget.disabled = false;
+      status.insertAdjacentHTML("afterbegin", `<div class="alert alert-danger py-2">${esc(err.message)}</div>`);
+    }
   });
 }

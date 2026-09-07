@@ -63,3 +63,9 @@ export function normalizeExistingNews(news) {
     return [{title, published_at}];
   });
 }
+
+export function excludeExistingNews(candidates, existingNews) {
+  const existingUrls = new Set((existingNews || []).map((item) => canonicalUrl(item?.url)).filter(Boolean));
+  const existingTitles = new Set((existingNews || []).map((item) => `${normalizeTitle(item?.title)}\u0000${normalizeText(item?.published_at)}`));
+  return candidates.filter((item) => !existingUrls.has(item.url) && !existingTitles.has(`${normalizeTitle(item.title)}\u0000${item.published_at}`));
+}

@@ -105,6 +105,7 @@ try {
     await route(`#/companies/${first.id}`);
     assert.equal(await cdp.waitFor(`document.querySelector('#profile-body h2')?.textContent===${JSON.stringify(first.name)}`), true);
     assert.equal(await cdp.evalJs("document.querySelectorAll('#generate-btn,#logo-form,#upload-form,a[download]').length"), 0);
+    assert.equal(await cdp.evalJs("Boolean(document.querySelector('#find-news-btn'))"), true);
     const text = await cdp.evalJs("document.querySelector('#profile-body').textContent");
     for (const label of ['Locations','References','News','Files']) assert.ok(text.includes(label), label);
     const screenshot = await cdp.send('Page.captureScreenshot', {format:'png',captureBeyondViewport:true});

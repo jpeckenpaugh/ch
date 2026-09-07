@@ -32,10 +32,18 @@ the top three. Real Gemma executions are intentionally manual benchmarks;
 automated tests use a fake ranker for reproducible normalization, validation,
 retry, and selection checks.
 
+## Live candidate discovery
+
+The company profile's **Find news** control is the Phase 2 entry point. It
+searches GDELT's public DOC ArticleList API for the company name, requests up
+to 25 recent results, normalizes and removes exact duplicates, then sends at
+most ten new candidates to Gemma. GDELT is discovery only: the user reviews
+Gemma's selected articles and explicitly confirms before `createNews()` writes
+them to the local workspace. GDELT may rate-limit a public IP; that is surfaced
+as a retryable error and never causes a partial write.
+
 ## Phase 2 boundary
 
-No live search, Company Hub reads, or writes belong here. If this benchmark
-shows useful, stable ranking quality, the same ranking module can later receive
-the `collectNewsCandidates({company, existingNews, limit: 10})` interface and
-present a preview for explicit user confirmation before calling
-`addCompanyNews()`.
+The collector and profile preview are now implemented; live runs remain
+foreground-only and user-confirmed. No scheduled collection or automatic writes
+are included.
