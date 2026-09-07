@@ -19,6 +19,7 @@ assert.match(run.prompt, /<\|turn>user/); assert.equal(run.rawResponses.length, 
 const invalid = {complete: async () => 'not json'};
 await assert.rejects(() => runFixture({fixture: fixtures[0], requested: 2, model: invalid}), (error) => error.rawResponses?.length === 2 && error.prompt.includes("<|turn>model"));
 assert.match(gdeltUrl('Toyota Motor'), /query=%22Toyota\+Motor%22/);
+assert.match(gdeltUrl('Toyota Motor',{format:'jsonp',callback:'cb'}), /format=jsonp.*callback=cb/);
 const gdeltCandidates = mapGdeltArticles({articles:[
   {title:'Toyota results',domain:'example.com',url:'https://example.com/results?utm_source=x',seendate:'20260906T120000Z'},
   {title:'Toyota results',domain:'example.com',url:'https://example.com/duplicate',seendate:'20260906T130000Z'},
@@ -26,4 +27,8 @@ const gdeltCandidates = mapGdeltArticles({articles:[
 assert.equal(gdeltCandidates.length, 1);
 const live = await runLiveRanking({company:{name:'Toyota',description:''},existingNews:[{title:'Old',url:'https://old.test',published_at:'2026-09-01'}],requested:1,model:{complete:async()=>'{"ranked_candidate_ids":[1],"reject_ids":[]}'},collectCandidates:async()=>gdeltCandidates});
 assert.equal(live.selected[0].title,'Toyota results');
+globalThis.window = {}; globalThis.document = {};
+const browserCollected = await (await import('../js/news-ranking/gdelt.js')).collectNewsCandidates({company:{name:'Toyota'},jsonpImpl:async()=>({articles:[{title:'Browser result',domain:'example.com',url:'https://example.com/browser',seendate:'20260906T120000Z'}]})});
+assert.equal(browserCollected[0].title,'Browser result');
+delete globalThis.window; delete globalThis.document;
 console.log('PASS news ranking deterministic pipeline');
